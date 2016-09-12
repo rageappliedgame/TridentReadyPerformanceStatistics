@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Open University of the Netherlands (http://www.ou.nl/)
+ * Copyright (C) 2016 e-UCM (http://www.e-ucm.es/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ounl.tridentreadyperformancestatistics;
+package es.eucm.gleaner.realtime.utils;
 
-/**
- *
- * @author gla
- */
-public class TaskVector {
-    public int taskID;
-    public int trial;
-    public Double mean;
-    public Double SD;
-    public Long n;    
-    
-    TaskVector() {
-        taskID = 0;
-        trial = 0;
-        mean = 0.0;
-        SD = 0.0;
-        n = 0L;
-    }
+import java.io.Serializable;
+
+public class EsConfig implements Serializable {
+
+	private final String host, sessionId;
+
+	/**
+	 * EsConfig Constructor
+	 * 
+	 * @param host
+	 *            Elasticsearch addresse (host pattern string array)
+	 */
+	public EsConfig(String host, String sessionId) {
+		this.host = host;
+		this.sessionId = sessionId;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
 }
