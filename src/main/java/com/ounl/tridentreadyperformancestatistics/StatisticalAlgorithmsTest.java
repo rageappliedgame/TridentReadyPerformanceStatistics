@@ -34,7 +34,7 @@ public class StatisticalAlgorithmsTest {
 //        Game A;Task 1;Student 1;Group 1;19-5-2016;0.159110123;0.225256615;
         input.put("gameID", "Game A");
         input.put("taskID", "Task 1");
-        input.put("studentID", "Student 1");
+        input.put("playerID", "Student 1");
         input.put("groupID", "Group 1");
         input.put("date", "19-5-2016");
         input.put("score", 0.159110123);
@@ -45,7 +45,7 @@ public class StatisticalAlgorithmsTest {
 //        Game A;Task 1;Student 2;Group 1;19-5-2016;1.193601535;1.436718613;
         input.put("gameID", "Game A");
         input.put("taskID", "Task 1");
-        input.put("studentID", "Student 2");
+        input.put("playerID", "Student 2");
         input.put("groupID", "Group 1");
         input.put("date", "19-5-2016");
         input.put("score", 1.193601535);
@@ -56,7 +56,7 @@ public class StatisticalAlgorithmsTest {
 //        Game A;Task 1;Student 3;Group 1;19-5-2016;0.800408171;0.268165926;
         input.put("gameID", "Game A");
         input.put("taskID", "Task 1");
-        input.put("studentID", "Student 3");
+        input.put("playerID", "Student 3");
         input.put("groupID", "Group 1");
         input.put("date", "19-5-2016");
         input.put("score", 0.800408171);
@@ -67,7 +67,7 @@ public class StatisticalAlgorithmsTest {
 //        Game A;Task 1;Student 4;Group 1;19-5-2016;1.146483123;1.643873708;
         input.put("gameID", "Game A");
         input.put("taskID", "Task 1");
-        input.put("studentID", "Student 4");
+        input.put("playerID", "Student 4");
         input.put("groupID", "Group 1");
         input.put("date", "19-5-2016");
         input.put("score", 1.146483123);
@@ -77,36 +77,37 @@ public class StatisticalAlgorithmsTest {
     }
     
     static void updateDistribution(HashMap input) {
-        // Initially we only use score in these performance statistics, so timeToComplete is redundant here
+        // Initially we only use score in these performance statistics, so timeToComplete is redundant here.
+        // Once score is functioning properly we will extend with timeToComplete.
+        // Furthermore, the initial analysis only allows analysis of player vs all other players.
+        // Once this comparison is functioning properly we will extend with player vs group, etc.
+        // Finally, initialy we ignore the gameID and assume that each taskID is unique across all games.
+        // Once complete, we will extend. Etc.
         
-        // A long is used here to simulate input from tuple
-        String gameID = (String)input.get("gameID");        
+        
+        // A HashMap is used to simpulate input by a tuple
+        String gameID = (String)input.get("gameID");
         String taskID = (String)input.get("taskID");
         String playerID = (String)input.get("playerID");
         String groupID = (String)input.get("groupID");
         String date = (String)input.get("date");
         double score = (Double)input.get("score");
         double timeToComplete = (Double)input.get("timeToComplete");
-        long trial = (Long)input.get("trial");
         
-        // We store data in mongoDB. There is one DB for the traces and one for the statistics results
+        // We retrieve and store data using mongoDB.
+        // There is one collection in the DB for the "traces" and one for the "statistics"
         
         // Step 1: retreive the trialnum by looking at the previous traces
         MongoClient mongoClient = new MongoClient();
         MongoDatabase db = mongoClient.getDatabase("performanceStatisticsDB");
         
-        // Find all database entries for a specific task in a specific game for a specific player
-        FindIterable<Document> iterable = db.getCollection("traces")
-                .find(new Document("gameID", gameID)
-                .append("taskID",taskID)
-                .append("playerID",playerID));
+        // Count all database entries for a specific task in a specific game for a specific player
+        long trial = db.getCollection("traces").count();
+        System.out.println(trial);
         
-        iterable.forEach(new Block<Document>() {
-            @Override
-            public void apply(final Document document) {
-                System.out.println(document);
-            }
-        });
+        
+        /*// Find the database entry for the task-trial combination that is to be analyzed
+        
         
         //New N, code guarantees N of 1 or higher
         Long oldN = trial;
