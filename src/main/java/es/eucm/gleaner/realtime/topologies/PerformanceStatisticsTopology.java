@@ -16,6 +16,7 @@
 package es.eucm.gleaner.realtime.topologies;
 
 import backtype.storm.tuple.Fields;
+
 import es.eucm.gleaner.realtime.utils.EsConfig;
 import es.eucm.gleaner.realtime.states.DocumentBuilder;
 import es.eucm.gleaner.realtime.filters.FieldValueFilter;
@@ -24,6 +25,10 @@ import es.eucm.gleaner.realtime.functions.TraceFieldExtractor;
 import es.eucm.gleaner.realtime.states.ESStateFactory;
 import es.eucm.gleaner.realtime.states.GameplayStateUpdater;
 import es.eucm.gleaner.realtime.states.TraceStateUpdater;
+
+import es.eucm.gleaner.realtime.functions.AddTrialNum;
+import es.eucm.gleaner.realtime.functions.StatisticsGenerator;
+
 import storm.trident.Stream;
 import storm.trident.TridentTopology;
 import storm.trident.fluent.GroupedStream;
@@ -32,12 +37,6 @@ import storm.trident.spout.ITridentSpout;
 import storm.trident.state.StateFactory;
 
 public class PerformanceStatisticsTopology extends TridentTopology {
-
-	// GLA (OUNL): this code is called when the system is started in production
-	// mode.
-	// For the code that is run when the system is started in debug or test
-	// mode, see the
-	// "RealtimeTopologyTest" class.
 
 	public <T> void prepareTest(ITridentSpout<T> spout,
 			StateFactory stateFactory, EsConfig esConfig) {
@@ -50,10 +49,17 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 		GameplayStateUpdater gameplayStateUpdater = new GameplayStateUpdater();
 
 		Stream tracesStream = createTracesStream(traces);
+                
+                // Some light testing
+                Stream trialStream = tracesStream.each(new Fields("trace"),
+                        new AddTrialNum("mongoHost","mongoPort","mongoDB"), new Fields("trial"));
+                
+//                System.out.print("stateFactory: ");
+//                System.out.println(stateFactory);
 
-		/** ---> Analysis definition <--- **/
+		/** ---> Analysis definition (previous code from UCM) <--- **/
 
-		Stream eventStream = tracesStream.each(new Fields("trace"),
+		/*Stream eventStream = tracesStream.each(new Fields("trace"),
 				new TraceFieldExtractor("gameplayId", "event"), new Fields(
 						"gameplayId", "event"));
 
@@ -96,10 +102,24 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 				.each(new Fields("trace"), new TraceFieldExtractor("target"),
 						new Fields("target"))
 				.groupBy(
-						new Fields("versionId", "gameplayId", "event", "target"));
+						new Fields("versionId", "gameplayId", "event", "target"));*/
 
+                /** ---> Performance Statistics stream definition and processing <---**/
+                
+                // This stream adds a trial number to tracesStream
+                /*Stream trialStream = tracesStream
+                        .each(new Fields("versionId", "gameplayId", ), 
+                                new AddTrialNum(), new Fields("added", "multiplied"));
+                
+                // This stream replaces the incoming trialStream with performance statistics output
+                Stream statisticsStream = trialStream
+                        .aggregate()*/
+                
 		/** ---> Results Persistance: Mongo DB & ElasticSearch <--- **/
 
+                
+                        
+                /* ---> (previous code from UCM)
 		// Output the GameplayState to Mongo DB
 
 		// Mongo DB Zone Persist
@@ -143,7 +163,8 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 			// Interactions ES Persist
 			interactionsTridentStream.persistentAggregate(factory, new Count(),
 					new Fields("count"));
-		}
+                        
+		}*/
 	}
 
 	protected Stream createTracesStream(Stream stream) {
