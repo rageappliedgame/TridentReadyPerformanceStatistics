@@ -33,12 +33,6 @@ import storm.trident.state.StateFactory;
 
 public class RealtimeTopology extends TridentTopology {
 
-	// GLA (OUNL): this code is called when the system is started in production
-	// mode.
-	// For the code that is run when the system is started in debug or test
-	// mode, see the
-	// "RealtimeTopologyTest" class.
-
 	public <T> void prepareTest(ITridentSpout<T> spout,
 			StateFactory stateFactory, EsConfig esConfig) {
 		prepare(newStream("traces", spout), stateFactory, esConfig);
