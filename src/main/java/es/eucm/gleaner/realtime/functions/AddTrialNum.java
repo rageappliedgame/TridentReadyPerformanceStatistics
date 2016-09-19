@@ -15,10 +15,11 @@
  */
 package es.eucm.gleaner.realtime.functions;
 
-import backtype.storm.Config;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
-import es.eucm.gleaner.realtime.utils.DBUtils;
 import java.net.UnknownHostException;
 import storm.trident.operation.Function;
 import storm.trident.operation.TridentCollector;
@@ -26,62 +27,51 @@ import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import static org.apache.storm.http.client.methods.RequestBuilder.options;
 
 public class AddTrialNum implements Function {
-	
-    private final String mongoHost;
-    private final String mongoPort;
-    private final String mongoDB;
     
-    public AddTrialNum (String host, String port, String db) {
-        // This method is called once whenever the topology creates a stream
-        // that uses this function (as tested by the System.out.printlns below)
-        mongoHost = host;
-        mongoPort = port;
-        mongoDB = db;
+    // These settings came from KafkaTest.java (they should come from conf in
+    // the prepare method but DBUtils keeps giving null pointer exceptions)
+    private String mongoHost = "localhost";
+    private int mongoPort = 27017;
+    private String mongoDB = "gleaner";
+    private DB db;
+    private String collectionName = "traces";
+    private DBCollection traces; // Connection for this function should be "traces"
         
-//        System.out.println(mongoHost);
-//        System.out.println(mongoPort);
-//        System.out.println(mongoDB);
-    }
-    
     @Override
     public void execute(TridentTuple objects, TridentCollector tridentCollector) {
-        // Take the gameplayId and the versionId to be able to seach the mongoDB for traces
-//        Map gameplayId = (Map) objects.getValueByField("gameplayId");
-//        Map versionId = (Map) objects.getValueByField("versionId");
-//        
-//        System.out.println(gameplayId.get("gameplayId"));
-//        System.out.println(versionId.get("versionId"));
-        System.out.println(mongoHost);
-        System.out.println(mongoPort);
-        System.out.println(mongoDB);
-
-        // Search and count the tracesDB in order to calculate the trialNum
-        /*try {
-            // Connect to the mongoDB
-
-            //My current problem? Getting the address of the mongoDB host, the port, and the db name
-
-        } catch (UnknownHostException e) {
-                e.printStackTrace();
-        } catch (MongoException e) {
-                e.printStackTrace();
-        }*/
-
+        BasicDBObject mongoDoc = new BasicDBObject();
+        mongoDoc.append("test",(Object)"Stuff");
+        long count = traces.count(mongoDoc);
+        
+        // For testing
+        System.out.print("There were this many documents in mongo: ");
+        System.out.println(count);
         // Append the result to the previously existing tuple
-        tridentCollector.emit(Arrays.asList(1));
+        tridentCollector.emit(Arrays.asList(1)); // This currently treats all tuples as the first tuple for that versionId
     }
 
     @Override
-    public void prepare(Map map, TridentOperationContext tridentOperationContext) {
-        // Not sure when this method is ever called :(
+    public void prepare(Map conf, TridentOperationContext context) {
+        // This method is called whenever this function is started for the first
+        // time and the trident system pases the config file here automatically
+        try {
+            // A connection is established to the mongo db and collection. If
+            // the db or collection does not exist, they are generated lazily.
+            db = (new MongoClient(mongoHost,mongoPort)).getDB(mongoDB);
+            traces = db.getCollection(collectionName);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void cleanup() {
-
+        
     }
 }

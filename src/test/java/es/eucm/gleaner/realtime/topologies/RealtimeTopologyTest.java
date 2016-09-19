@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2016 e-UCM (http://www.e-ucm.es/) &
  * Copyright (C) 2016 Open University of the Netherlands (http://www.ou.nl/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

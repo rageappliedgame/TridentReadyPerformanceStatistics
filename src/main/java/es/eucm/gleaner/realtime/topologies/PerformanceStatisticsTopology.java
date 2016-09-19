@@ -52,7 +52,7 @@ public class PerformanceStatisticsTopology extends TridentTopology {
                 
                 // Some light testing
                 Stream trialStream = tracesStream.each(new Fields("trace"),
-                        new AddTrialNum("mongoHost","mongoPort","mongoDB"), new Fields("trial"));
+                        new AddTrialNum(), new Fields("trial"));
                 
 //                System.out.print("stateFactory: ");
 //                System.out.println(stateFactory);

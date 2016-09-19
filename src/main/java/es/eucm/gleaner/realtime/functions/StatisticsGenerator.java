@@ -53,8 +53,10 @@ public class StatisticsGenerator implements Function {
         }
 
 	@Override
-	public void prepare(Map map, TridentOperationContext tridentOperationContext) {
-
+	public void prepare(Map conf, TridentOperationContext context) {
+            // This method is called whenever this function is started for the first
+            // time and the trident system pases the config file here automatically
+            
 	}
 
 	@Override
