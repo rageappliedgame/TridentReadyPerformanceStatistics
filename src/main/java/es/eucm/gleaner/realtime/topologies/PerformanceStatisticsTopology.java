@@ -50,7 +50,7 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 
 		Stream tracesStream = createTracesStream(traces);
                 
-                // Performance statistics processing
+                // Performance statistics processing stream
                 Stream performanceStatisticsStream = tracesStream
                         .each(new Fields("trace"),
 				new TraceFieldExtractor("gameplayId", "event", "target", "value"),

@@ -16,12 +16,13 @@
 package es.eucm.gleaner.realtime.functions;
 
 import backtype.storm.tuple.Values;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import storm.trident.operation.Function;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
@@ -45,17 +46,34 @@ public class AddTrialNum implements Function {
         
     @Override
     public void execute(TridentTuple objects, TridentCollector tridentCollector) {
-//        // Extract values from the tuple
-//        String playerId;
-//        String taskId;
-//        
-//        // Check database using the values
-//        BasicDBObject mongoDoc = new BasicDBObject();
-//        mongoDoc.append("test",(Object)"Stuff");
-//        
-//        //Generate a trial number
-//        long trial = traces.count(mongoDoc);
-        tridentCollector.emit(new Values(1)); // This currently treats all tuples as the first tuple for that versionId
+        // Extract values from the tuple
+        Object playerId = objects.getValueByField("gameplayId");
+        Object taskId = objects.getValueByField("target");
+        
+        // Generate mongoDB query using the playerId and taskId
+        BasicDBObject mongoDoc = new BasicDBObject();
+        mongoDoc.append("playerId",playerId);
+        mongoDoc.append("taskId",taskId);
+
+        // Query the database in order to find the trial
+        long count = traces.count(mongoDoc);
+        if (count == 0){
+            // The doc did not previously exist so it will be created
+            mongoDoc.append("trial",count+1);
+            traces.insert(mongoDoc);
+        } else {
+            // The doc already existed so update the trial number by 1
+            BasicDBObject newDocument = 
+		new BasicDBObject().append("$inc", 
+		new BasicDBObject().append("trial", 1));
+			
+            traces.update(new BasicDBObject().append("playerId",playerId).append("taskId",taskId), newDocument);
+        }
+        
+        // Query and emit the the trial
+        DBCursor curDoc = traces.find(new BasicDBObject().append("playerId",playerId).append("taskId",taskId));
+        long trial = (long)curDoc.next().get("trial");
+        tridentCollector.emit(new Values(trial));
     }
 
     @Override
