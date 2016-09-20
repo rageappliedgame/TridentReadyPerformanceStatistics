@@ -50,19 +50,24 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 
 		Stream tracesStream = createTracesStream(traces);
                 
-                // Some light testing
-                Stream trialStream = tracesStream.each(new Fields("trace"),
-                        new AddTrialNum(), new Fields("trial"));
+                // Performance statistics processing
+                Stream performanceStatisticsStream = tracesStream
+                        .each(new Fields("trace"),
+				new TraceFieldExtractor("gameplayId", "event", "target", "value"),
+                                new Fields("gameplayId", "event", "target", "value"))
+                        .each(new Fields("gameplayId","target"),
+                                new AddTrialNum(), new Fields("trial"))
+                        .each(new Fields("gameplayId","target","trial"),
+                                new StatisticsGenerator(), new Fields());
                 
-//                System.out.print("stateFactory: ");
-//                System.out.println(stateFactory);
+		/** ---> Analysis definition <--- **/
 
-		/** ---> Analysis definition (previous code from UCM) <--- **/
-
-		/*Stream eventStream = tracesStream.each(new Fields("trace"),
+		Stream eventStream = tracesStream.each(new Fields("trace"),
 				new TraceFieldExtractor("gameplayId", "event"), new Fields(
 						"gameplayId", "event"));
-
+                
+                
+                
 		// Zones
 		Stream zonesTridentStream = eventStream
 				.each(new Fields("event", "trace"),
@@ -102,24 +107,10 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 				.each(new Fields("trace"), new TraceFieldExtractor("target"),
 						new Fields("target"))
 				.groupBy(
-						new Fields("versionId", "gameplayId", "event", "target"));*/
-
-                /** ---> Performance Statistics stream definition and processing <---**/
-                
-                // This stream adds a trial number to tracesStream
-                /*Stream trialStream = tracesStream
-                        .each(new Fields("versionId", "gameplayId", ), 
-                                new AddTrialNum(), new Fields("added", "multiplied"));
-                
-                // This stream replaces the incoming trialStream with performance statistics output
-                Stream statisticsStream = trialStream
-                        .aggregate()*/
-                
+						new Fields("versionId", "gameplayId", "event", "target"));
+          
 		/** ---> Results Persistance: Mongo DB & ElasticSearch <--- **/
 
-                
-                        
-                /* ---> (previous code from UCM)
 		// Output the GameplayState to Mongo DB
 
 		// Mongo DB Zone Persist
@@ -164,7 +155,7 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 			interactionsTridentStream.persistentAggregate(factory, new Count(),
 					new Fields("count"));
                         
-		}*/
+		}
 	}
 
 	protected Stream createTracesStream(Stream stream) {

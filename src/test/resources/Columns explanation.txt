@@ -1,0 +1,6 @@
+Meaning of columns in traces.txt
+
+1: gameplayId (=playerId)
+2: event type (=zone, var, interact,choice)(performance statistics only uses var)
+3: target (=taskId)
+4: value (=score)

@@ -15,43 +15,47 @@
  */
 package es.eucm.gleaner.realtime.functions;
 
-import com.mongodb.BasicDBObject;
+import backtype.storm.tuple.Values;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import storm.trident.operation.Function;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
 
-import java.util.Arrays;
 import java.util.Map;
-import static org.apache.storm.http.client.methods.RequestBuilder.options;
 
+
+// Author (GLA) notes: consider changing this function to State or QueryFunction for
+// performance reasons (tuple batch operations)!
 public class AddTrialNum implements Function {
     
     // These settings came from KafkaTest.java (they should come from conf in
     // the prepare method but DBUtils keeps giving null pointer exceptions)
-    private String mongoHost = "localhost";
-    private int mongoPort = 27017;
-    private String mongoDB = "gleaner";
+    private final String mongoHost = "localhost";
+    private final int mongoPort = 27017;
+    private final String mongoDB = "gleaner";
+    private final String collectionName = "traces";
     private DB db;
-    private String collectionName = "traces";
     private DBCollection traces; // Connection for this function should be "traces"
         
     @Override
     public void execute(TridentTuple objects, TridentCollector tridentCollector) {
-        BasicDBObject mongoDoc = new BasicDBObject();
-        mongoDoc.append("test",(Object)"Stuff");
-        long count = traces.count(mongoDoc);
-        
-        // For testing
-        System.out.print("There were this many documents in mongo: ");
-        System.out.println(count);
-        // Append the result to the previously existing tuple
-        tridentCollector.emit(Arrays.asList(1)); // This currently treats all tuples as the first tuple for that versionId
+//        // Extract values from the tuple
+//        String playerId;
+//        String taskId;
+//        
+//        // Check database using the values
+//        BasicDBObject mongoDoc = new BasicDBObject();
+//        mongoDoc.append("test",(Object)"Stuff");
+//        
+//        //Generate a trial number
+//        long trial = traces.count(mongoDoc);
+        tridentCollector.emit(new Values(1)); // This currently treats all tuples as the first tuple for that versionId
     }
 
     @Override

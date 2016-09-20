@@ -15,7 +15,6 @@
  */
 package es.eucm.gleaner.realtime.functions;
 
-import backtype.storm.Config;
 import storm.trident.operation.Function;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
@@ -27,29 +26,8 @@ public class StatisticsGenerator implements Function {
         
         @Override
 	public void execute(TridentTuple objects, TridentCollector tridentCollector) {
-            // Take the gameplayId and the versionId to be able to seach the mongoDB for traces
-            Map gameplayId = (Map) objects.getValueByField("gameplayId");
-            Map versionId = (Map) objects.getValueByField("versionId");
-//            Object temp = conf.get("mongoHost");
-//            String host = (String)temp;
-//            System.out.println(host);
-
-            // Search and count the tracesDB in order to calculate the trialNum
-            /*try {
-                // Connect to the mongoDB
-
-                //My current problem? Getting the address of the mongoDB host, the port, and the db name
-
-            } catch (UnknownHostException e) {
-                    e.printStackTrace();
-            } catch (MongoException e) {
-                    e.printStackTrace();
-            }
-
-            // Append the result to the previously existing tuple
-            if (value != null) {
-                    tridentCollector.emit(Arrays.asList(trialNum));
-            }*/
+            System.out.print("Tuple with trial added: ");
+            System.out.println(objects);
         }
 
 	@Override
