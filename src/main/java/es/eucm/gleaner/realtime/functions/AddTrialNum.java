@@ -36,11 +36,12 @@ import java.util.Map;
 public class AddTrialNum implements Function {
     
     // These settings came from KafkaTest.java (they should come from conf in
-    // the prepare method but DBUtils keeps giving null pointer exceptions)
+    // the prepare method but DBUtils gives null pointer exceptions)
     private final String mongoHost = "localhost";
     private final int mongoPort = 27017;
-    private final String mongoDB = "gleaner";
+    private final String mongoDB = "gleaner";    
     private final String collectionName = "traces";
+    private MongoClient mongoClient;
     private DB db;
     private DBCollection traces; // Connection for this function should be "traces"
         
@@ -83,7 +84,8 @@ public class AddTrialNum implements Function {
         try {
             // A connection is established to the mongo db and collection. If
             // the db or collection does not exist, they are generated lazily.
-            db = (new MongoClient(mongoHost,mongoPort)).getDB(mongoDB);
+            mongoClient = new MongoClient();
+            db = mongoClient.getDB(mongoDB);
             traces = db.getCollection(collectionName);
         } catch (UnknownHostException e) {
             e.printStackTrace();

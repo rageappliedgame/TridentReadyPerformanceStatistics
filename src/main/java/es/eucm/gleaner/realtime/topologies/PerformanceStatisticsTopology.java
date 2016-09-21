@@ -27,7 +27,7 @@ import es.eucm.gleaner.realtime.states.GameplayStateUpdater;
 import es.eucm.gleaner.realtime.states.TraceStateUpdater;
 
 import es.eucm.gleaner.realtime.functions.AddTrialNum;
-import es.eucm.gleaner.realtime.functions.StatisticsGenerator;
+import es.eucm.gleaner.realtime.functions.DescriptivesGenerator;
 
 import storm.trident.Stream;
 import storm.trident.TridentTopology;
@@ -56,9 +56,12 @@ public class PerformanceStatisticsTopology extends TridentTopology {
 				new TraceFieldExtractor("gameplayId", "event", "target", "value"),
                                 new Fields("gameplayId", "event", "target", "value"))
                         .each(new Fields("gameplayId","target"),
-                                new AddTrialNum(), new Fields("trial"))
-                        .each(new Fields("gameplayId","target","trial"),
-                                new StatisticsGenerator(), new Fields());
+                                new AddTrialNum(),
+                                new Fields("trial"))
+                        .each(new Fields("target","value","trial"),
+                                new DescriptivesGenerator(),
+                                new Fields("max","min","sum","variance","mean","stdDev","skewness",
+                                        "kurtosis","n","normal","help1","help2","help3"));
                 
 		/** ---> Analysis definition <--- **/
 
